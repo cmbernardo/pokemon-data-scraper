@@ -6,6 +6,12 @@ pokedex_result = requests.get(pokedex_url)
 
 pokedex_doc = BeautifulSoup(pokedex_result.text, "html.parser")
 
-pokemon_list = list(dict.fromkeys(pokedex_doc.find_all('a', class_="ent-name")))
+# list all pokemon names without duplicates
+pokemons = list(dict.fromkeys(pokedex_doc.find_all("a", class_ = "ent-name")))
 
-print(pokemon_list)
+pokemon_name_list = []
+
+for pokemon in pokemons:
+    pokemon_name_list.append(pokemon.string)
+
+print(pokemon_name_list)
