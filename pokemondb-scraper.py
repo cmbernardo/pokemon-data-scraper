@@ -1,25 +1,66 @@
 from bs4 import BeautifulSoup
 import requests
+import pandas as pd
 
 pokedex_url = "https://pokemondb.net/pokedex/all"
 pokedex_response = requests.get(pokedex_url)
 pokedex_soup = BeautifulSoup(pokedex_response.text, "html.parser")
 
 # list all pokemon names without duplicates
-pokemon_name_list = [name.text for name in list(dict.fromkeys(pokedex_soup.find_all("a", class_ = "ent-name")))]
+pokemon_href = list(dict.fromkeys(pokedex_soup.find_all("a", class_ = "ent-name")))
 
-# for name in pokemon_name_list:
-#TODO     ADD CODE HERE!!
+pokemon_details = []
+pokemon_stats = []
 
-#TODO ADD THIS CODE AFTER TESTING!!  
-pokemon_url = "https://pokemondb.net/pokedex/bulbasaur"
-pokemon_response = requests.get(pokemon_url)
-pokemon_soup = BeautifulSoup(pokemon_response.text, "html.parser")
+for href in pokemon_href:
+    pokemon_url = "https://pokemondb.net" + href["href"]
+    pokemon_response = requests.get(pokemon_url)
+    pokemon_soup = BeautifulSoup(pokemon_response.text, "html.parser")
 
-# Pokemon Info
-pokemon_id = int(pokemon_soup.find("th", string = "National №").find_next("td").text)
-pokemon_name = pokemon_soup.find("h1").text
-pokemon_type = [type.text for type in pokemon_soup.find("th", string = "Type").find_next("td").find_all("a")]
-pokemon_description = " ".join([desc.text for desc in pokemon_soup.find("div", class_ = "tabset-basics").find_all_previous("p")][::-1])
+    # Pokemon Details
+    pokemon_id = int(pokemon_soup.find("th", string = "National №").find_next("td").text)
+    pokemon_name = pokemon_soup.find("h1").text
+    pokemon_type = [type.text for type in pokemon_soup.find("th", string = "Type").find_next("td").find_all("a")]
+    pokemon_description = " ".join([desc.text for desc in pokemon_soup.find("div", class_ = "tabset-basics").find_all_previous("p")][::-1])
+    pokemon_abilities = [ability.text for ability in pokemon_soup.find("th", string = "Abilities").find_next("td").find_all("a")]
+    pokemon_catch_rate = pokemon_soup.find("th", string = "Catch rate").find_next("td").text.strip().split()[0]
+    pokemon_gender = [gender.text for gender in pokemon_soup.find("th", string = "Gender").find_next("td").find_all("span")]
+    pokemon_generation = pokemon_soup.find("abbr").text.strip().split()[-1]
 
-print(pokemon_description)
+    pokemon_details.append({
+        "Pokemon ID": pokemon_id, 
+        "Name": pokemon_name, 
+        "Type": pokemon_type, 
+        "Description": pokemon_description, 
+        "Abilities": pokemon_abilities, 
+        "Catch Rate": pokemon_catch_rate, 
+        "Gender": pokemon_gender,
+        "Generation": pokemon_generation
+    })
+
+    # Pokemon Stats
+    pokemon_hp = pokemon_soup.find("th", string = "HP").find_next("td").text
+    pokemon_attack = pokemon_soup.find("th", string = "Attack").find_next("td").text
+    pokemon_defense = pokemon_soup.find("th", string = "Defense").find_next("td").text
+    pokemon_sp_atk = pokemon_soup.find("th", string = "Sp. Atk").find_next("td").text
+    pokemon_sp_def = pokemon_soup.find("th", string = "Sp. Def").find_next("td").text
+    pokemon_speed = pokemon_soup.find("th", string = "Speed").find_next("td").text
+    pokemon_stats_total = pokemon_soup.find("th", string = "Total").find_next("td").text
+
+    pokemon_stats.append({
+        "Pokemon ID": pokemon_id,
+        "HP": pokemon_hp,
+        "Attack": pokemon_attack,
+        "Defense": pokemon_defense,
+        "Sp. Atk": pokemon_sp_atk,
+        "SP. Def": pokemon_sp_def,
+        "Speed": pokemon_speed,
+        "Total": pokemon_stats_total
+    })
+
+
+    details_df = pd.DataFrame(pokemon_details)
+    stats_df = pd.DataFrame(pokemon_stats)
+    
+    details_df.to_csv("./pokemon-details.csv", header = True, index = False, encoding = "utf-8-sig")
+    stats_df.to_csv("./pokemon-stats.csv", header = True, index = False, encoding = "utf-8-sig")
