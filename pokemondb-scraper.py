@@ -58,9 +58,8 @@ for href in pokemon_href:
         "Total": pokemon_stats_total
     })
 
-
-    details_df = pd.DataFrame(pokemon_details)
-    stats_df = pd.DataFrame(pokemon_stats)
+details_df = pd.DataFrame(pokemon_details)
+stats_df = pd.DataFrame(pokemon_stats)
     
-    details_df.to_csv("./pokemon-details.csv", header = True, index = False, encoding = "utf-8-sig")
-    stats_df.to_csv("./pokemon-stats.csv", header = True, index = False, encoding = "utf-8-sig")
+details_df.to_csv("./pokemon-details.csv", header = True, index = False, encoding = "utf-8-sig")
+stats_df.to_csv("./pokemon-stats.csv", header = True, index = False, encoding = "utf-8-sig")
