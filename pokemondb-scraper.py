@@ -21,6 +21,10 @@ for href in pokemon_href:
     pokemon_id = int(pokemon_soup.find("th", string = "National №").find_next("td").text)
     pokemon_name = pokemon_soup.find("h1").text
     pokemon_type = [type.text for type in pokemon_soup.find("th", string = "Type").find_next("td").find_all("a")]
+    pokemon_type1 = pokemon_type[0]
+    pokemon_type2 = ""
+    if (len(pokemon_type) == 2):
+        pokemon_type2 = pokemon_type[1]
     pokemon_description = " ".join([desc.text for desc in pokemon_soup.find("div", class_ = "tabset-basics").find_all_previous("p")][::-1])
     pokemon_abilities = [ability.text for ability in pokemon_soup.find("th", string = "Abilities").find_next("td").find_all("a")]
     pokemon_catch_rate = pokemon_soup.find("th", string = "Catch rate").find_next("td").text.strip().split()[0]
@@ -30,7 +34,8 @@ for href in pokemon_href:
     pokemon_details.append({
         "Pokemon ID": pokemon_id, 
         "Name": pokemon_name, 
-        "Type": pokemon_type, 
+        "Type 1": pokemon_type1, 
+        "Type 2": pokemon_type2, 
         "Description": pokemon_description, 
         "Abilities": pokemon_abilities, 
         "Catch Rate": pokemon_catch_rate, 
