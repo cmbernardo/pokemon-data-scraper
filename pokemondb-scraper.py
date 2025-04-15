@@ -25,10 +25,12 @@ for href in pokemon_href:
     pokemon_type2 = ""
     if (len(pokemon_type) == 2):
         pokemon_type2 = pokemon_type[1]
-    pokemon_description = " ".join([desc.text for desc in pokemon_soup.find("div", class_ = "tabset-basics").find_all_previous("p")][::-1])
-    pokemon_abilities = [ability.text for ability in pokemon_soup.find("th", string = "Abilities").find_next("td").find_all("a")]
+    pokemon_description = ""
+    if (pokemon_soup.find("h2", string = "Pokédex entries")):
+        pokemon_description = pokemon_soup.find("h2", string = "Pokédex entries").find_next("div").find("td", class_ = "cell-med-text").text
+    pokemon_abilities = ', '.join([ability.text for ability in pokemon_soup.find("th", string = "Abilities").find_next("td").find_all("a")])
     pokemon_catch_rate = pokemon_soup.find("th", string = "Catch rate").find_next("td").text.strip().split()[0]
-    pokemon_gender = [gender.text for gender in pokemon_soup.find("th", string = "Gender").find_next("td").find_all("span")]
+    pokemon_gender = ', '.join([gender.text for gender in pokemon_soup.find("th", string = "Gender").find_next("td").find_all("span")])
     pokemon_generation = pokemon_soup.find("abbr").text.strip().split()[-1]
 
     pokemon_details.append({
@@ -63,8 +65,8 @@ for href in pokemon_href:
         "Total": pokemon_stats_total
     })
 
-details_df = pd.DataFrame(pokemon_details)
-stats_df = pd.DataFrame(pokemon_stats)
-    
-details_df.to_csv("./pokemon-details.csv", header = True, index = False, encoding = "utf-8-sig")
-stats_df.to_csv("./pokemon-stats.csv", header = True, index = False, encoding = "utf-8-sig")
+    details_df = pd.DataFrame(pokemon_details)
+    stats_df = pd.DataFrame(pokemon_stats)
+        
+    details_df.to_csv("./pokemon-details.csv", header = True, index = False, encoding = "utf-8-sig")
+    stats_df.to_csv("./pokemon-stats.csv", header = True, index = False, encoding = "utf-8-sig")
