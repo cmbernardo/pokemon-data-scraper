@@ -1,6 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+import json
+import time
+
+time_start = time.time()
 
 pokedex_url = "https://pokemondb.net/pokedex/all"
 pokedex_response = requests.get(pokedex_url)
@@ -10,18 +14,18 @@ pokedex_soup = BeautifulSoup(pokedex_response.text, "html.parser")
 pokemon_href = list(dict.fromkeys(pokedex_soup.find_all("a", class_ = "ent-name")))
 pokemon_data = []
 
-print(f"[FETCH DATA]: START")
+print("[FETCH DATA]: START")
 
 for href in pokemon_href:
     data = {}
-    
+    print(f"[FETCHING DATA]: {href["href"][9:].capitalize()}")
     pokemon_url = "https://pokemondb.net" + href["href"]
     pokemon_response = requests.get(pokemon_url)
     pokemon_soup = BeautifulSoup(pokemon_response.text, "html.parser")
 
     # Pokemon Details
     pokemon_id = int(pokemon_soup.find("th", string = "National №").find_next("td").text)
-    pokemon_id = f"{pokemon_id:05d}"
+    pokemon_id = f"{pokemon_id:04d}"
     data["Pokemon ID"] = pokemon_id
     
     pokemon_name = pokemon_soup.find("h1").text
@@ -83,5 +87,8 @@ for href in pokemon_href:
 
 print("[FETCH DATA]: DONE")
 
-pd.DataFrame(pokemon_data).to_json("./pokemon-data.json", orient = "records")
+with open("pokemon-data.json", "w") as outfile:
+    json.dump(pokemon_data, outfile, indent=4)
 print("[SAVE DATA]: Data saved to \"pokemon-data.json\"")
+
+print(f"[EXECUTION TIME]: {(time.time() - time_start):.2f}s")
